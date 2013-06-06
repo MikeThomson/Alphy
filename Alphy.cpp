@@ -32,15 +32,6 @@ void loop() {
 void initCommands() {
 	serialCommand.addCommand("PING", pong);
 	serialCommand.addCommand("SELECT", selectServo);
-	serialCommand.addCommand("u", raiseServo);
-	serialCommand.addCommand("d", lowerServo);
-	serialCommand.addCommand("uf", raiseFemurs);
-	serialCommand.addCommand("df", lowerFemurs);
-	serialCommand.addCommand("ut", raiseTibias);
-	serialCommand.addCommand("dt", lowerTibias);
-	serialCommand.addCommand("ic", insideCoxas);
-	serialCommand.addCommand("oc", outerCoxas);
-	serialCommand.addCommand("leg", moveLeg);
 	serialCommand.addCommand("SET", setServo);
 	serialCommand.addCommand("TIME", time);
 	serialCommand.addCommand("FREE", freeMem);
@@ -66,46 +57,6 @@ void initServos() {
 	for (int i = 0; i < 12; i++) {
 		writeServo(i, 90);
 	}
-}
-
-void simpleRaise() {
-	servos[FRONT_RIGHT_FEMUR].write(
-			constrainAngle(servos[FRONT_RIGHT_FEMUR].read() + 10));
-	servos[FRONT_LEFT_FEMUR].write(
-			constrainAngle(servos[FRONT_LEFT_FEMUR].read() + 10));
-	servos[BACK_RIGHT_FEMUR].write(
-			constrainAngle(servos[BACK_RIGHT_FEMUR].read() + 10));
-	servos[BACK_LEFT_FEMUR].write(
-			constrainAngle(servos[BACK_LEFT_FEMUR].read() + 10));
-
-	servos[FRONT_RIGHT_TIBIA].write(
-			constrainAngle(servos[FRONT_RIGHT_TIBIA].read() + 10));
-	servos[FRONT_LEFT_TIBIA].write(
-			constrainAngle(servos[FRONT_LEFT_TIBIA].read() + 10));
-	servos[BACK_RIGHT_TIBIA].write(
-			constrainAngle(servos[BACK_RIGHT_TIBIA].read() + 10));
-	servos[BACK_LEFT_TIBIA].write(
-			constrainAngle(servos[BACK_LEFT_TIBIA].read() + 10));
-}
-
-void simpleLower() {
-	servos[FRONT_RIGHT_FEMUR].write(
-			constrainAngle(servos[FRONT_RIGHT_FEMUR].read() - 10));
-	servos[FRONT_LEFT_FEMUR].write(
-			constrainAngle(servos[FRONT_LEFT_FEMUR].read() - 10));
-	servos[BACK_RIGHT_FEMUR].write(
-			constrainAngle(servos[BACK_RIGHT_FEMUR].read() - 10));
-	servos[BACK_LEFT_FEMUR].write(
-			constrainAngle(servos[BACK_LEFT_FEMUR].read() - 10));
-
-	servos[FRONT_RIGHT_TIBIA].write(
-			constrainAngle(servos[FRONT_RIGHT_TIBIA].read() - 10));
-	servos[FRONT_LEFT_TIBIA].write(
-			constrainAngle(servos[FRONT_LEFT_TIBIA].read() - 10));
-	servos[BACK_RIGHT_TIBIA].write(
-			constrainAngle(servos[BACK_RIGHT_TIBIA].read() - 10));
-	servos[BACK_LEFT_TIBIA].write(
-			constrainAngle(servos[BACK_LEFT_TIBIA].read() - 10));
 }
 
 int constrainAngle(int angle) {
@@ -164,63 +115,13 @@ void writeServo(int servo, int angleSet) {
 		finalAngle = constrainAngle(angleSet);
 		servoAngles[servo] = finalAngle;
 	}
-	debug("Servo ");
+	debug("SERVO ");
 	debug(servo);
-	debug(" set to ");
+	debug(" [");
 	debug(finalAngle);
-	debug("\r\n");
+	debug("]\r\n");
 	servos[servo].write(finalAngle);
 
-}
-
-void raiseServo() {
-	writeServo(currentServo, servoAngles[currentServo] + 10);
-}
-
-void lowerServo() {
-	writeServo(currentServo, servoAngles[currentServo] - 10);
-}
-
-void lowerFemurs() {
-	writeServo(FRONT_RIGHT_FEMUR, 45);
-	writeServo(FRONT_LEFT_FEMUR, 45);
-	writeServo(BACK_RIGHT_FEMUR, 45);
-	writeServo(BACK_LEFT_FEMUR, 45);
-}
-
-void lowerTibias() {
-	writeServo(FRONT_RIGHT_TIBIA, 45);
-	writeServo(FRONT_LEFT_TIBIA, 45);
-	writeServo(BACK_RIGHT_TIBIA, 45);
-	writeServo(BACK_LEFT_TIBIA, 45);
-}
-
-void raiseFemurs() {
-	writeServo(FRONT_RIGHT_FEMUR, 135);
-	writeServo(FRONT_LEFT_FEMUR, 135);
-	writeServo(BACK_RIGHT_FEMUR, 135);
-	writeServo(BACK_LEFT_FEMUR, 135);
-}
-
-void raiseTibias() {
-	writeServo(FRONT_RIGHT_TIBIA, 135);
-	writeServo(FRONT_LEFT_TIBIA, 135);
-	writeServo(BACK_RIGHT_TIBIA, 135);
-	writeServo(BACK_LEFT_TIBIA, 135);
-}
-
-void insideCoxas() {
-	writeServo(FRONT_RIGHT_COXA, 45);
-	writeServo(FRONT_LEFT_COXA, 45);
-	writeServo(BACK_RIGHT_COXA, 45);
-	writeServo(BACK_LEFT_COXA, 45);
-}
-
-void outerCoxas() {
-	writeServo(FRONT_RIGHT_COXA, 135);
-	writeServo(FRONT_LEFT_COXA, 135);
-	writeServo(BACK_RIGHT_COXA, 135);
-	writeServo(BACK_LEFT_COXA, 135);
 }
 
 void pong() {
@@ -350,13 +251,6 @@ void freeMem() {
 	debug("FREE MEMORY: ");
 	debug(freeMemory());
 	debug("\r\n");
-}
-
-void simpleStand() {
-	writeServo(FRONT_RIGHT_COXA, 45);
-	writeServo(BACK_RIGHT_COXA, 45);
-	writeServo(FRONT_LEFT_COXA, 45);
-	writeServo(BACK_LEFT_COXA, 45);
 }
 
 void time() {
