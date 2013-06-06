@@ -56,7 +56,7 @@
 #define BACK_LEFT_FEMUR_INVERT false
 #define BACK_LEFT_TIBIA_INVERT true
 
-#define BACK_RIGHT_COXA_INVERT false
+#define BACK_RIGHT_COXA_INVERT true
 #define BACK_RIGHT_FEMUR_INVERT true
 #define BACK_RIGHT_TIBIA_INVERT false
 
@@ -64,6 +64,8 @@
 #define SERVO_MIN 30
 #define SERVO_MAX 150
 
+#define DEBUG_SERIAL1
+#define DEBUG_SERIAL
 #define SERIAL_SPEED 115200
 #define SERIALCOMMAND_DEBUG
 

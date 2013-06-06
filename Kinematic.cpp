@@ -19,7 +19,7 @@ Kinematic::Kinematic() :
 	// TODO Auto-generated constructor stub
 }
 
-void Kinematic::calculate(float x, float y, float z) {
+void Kinematic::calculateInverse(float x, float y, float z) {
 	// Set the x y z cached vars
 	this->x = x;
 	this->y = y;
@@ -27,9 +27,9 @@ void Kinematic::calculate(float x, float y, float z) {
 
 	// calculate L, it's sued in the others
 	this->l = getL();
-	this->coxa = getGamma();
-	this->femur = getAlpha();
-	this->tibia = getBeta();
+	this->coxa = toDegrees(getGamma());
+	this->femur = toDegrees(getAlpha());
+	this->tibia = toDegrees(getBeta());
 }
 
 int Kinematic::getCoxaAngle() {
@@ -40,11 +40,11 @@ int Kinematic::getFemurAngle() {
 	return femur;
 }
 
-int Kinematic::getTibiAngle() {
+int Kinematic::getTibiaAngle() {
 	return tibia;
 }
 
-int Kinematic::getAlpha() {
+float Kinematic::getAlpha() {
 	return (
 		acos(z/this->l) +
 		acos(
@@ -54,11 +54,11 @@ int Kinematic::getAlpha() {
 	);
 }
 
-int Kinematic::getGamma() {
+float Kinematic::getGamma() {
 	return atan(x/y);
 }
 
-int Kinematic::getBeta() {
+float Kinematic::getBeta() {
 	return (
 			acos(
 					((l*l)-(TIBIA_LENGTH*TIBIA_LENGTH) - (FEMUR_LENGTH * FEMUR_LENGTH)) /
@@ -69,4 +69,15 @@ int Kinematic::getBeta() {
 
 float Kinematic::getL() {
 	return sqrt(z*z + y*y);
+}
+
+float Kinematic::toDegrees(float float1) {
+	return float1 * 180.0 / 3.14159;
+}
+
+void Kinematic::calculateForward(int coxa, int femur, int tibia) {
+}
+
+float Kinematic::toRadians(float degrees) {
+
 }

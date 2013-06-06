@@ -13,20 +13,23 @@
 class Kinematic {
 public:
 	Kinematic();
-	void calculate(float x, float y, float z);
+	void calculateInverse(float x, float y, float z);
+	void calculateForward(int coxa, int femur, int tibia);
 	int getCoxaAngle();
 	int getFemurAngle();
-	int getTibiAngle();
+	int getTibiaAngle();
 private:
 	int coxa;
 	int femur;
 	int tibia;
 	float l;
 	float x, y, z;
-	int getAlpha();
-	int getGamma();
-	int getBeta();
+	float getAlpha();
+	float getGamma();
+	float getBeta();
 	float getL();
+	float toDegrees(float);
+	float toRadians(float degrees);
 };
 
 #endif /* KINEMATIC_H_ */
