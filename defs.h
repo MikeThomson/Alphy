@@ -8,6 +8,8 @@
 #ifndef DEFS_H_
 #define DEFS_H_
 
+#define BUILDSTRING "Alphy v0.0.1"
+
 // Servo array IDs
 #define FRONT_LEFT_COXA 0
 #define FRONT_LEFT_FEMUR 1
@@ -72,6 +74,10 @@
 #define TIBIA_LENGTH 2.0
 #define FEMUR_LENGTH 2.0
 #define COXA_LENGTH 2.0
+
+#define WEIGHT_FOR_LOOPSPEED = 0.3
+
+#define DEFAULT_RUN_SPEED 1000
 
 
 #endif /* DEFS_H_ */

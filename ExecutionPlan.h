@@ -18,9 +18,10 @@ public:
 	int getCurrentStep();
 	int getStepCount();
 	void setDelay(long wait);
+	void reset();
 
 private:
-	int plan[][12];
+	int plan[10][12];
 	int currentStep;
 	int stepCount;
 	long timePassed;

@@ -10,7 +10,7 @@
 ExecutionPlan::ExecutionPlan(int steps, void (*cb)(int, int)) {
 	// TODO Auto-generated constructor stub
 	stepCount = steps;
-	plan = new int[stepCount][12];
+	//plan = new int[1][12];
 	callback = cb;
 	delay = 0;
 	currentStep = 0;
@@ -58,4 +58,8 @@ int ExecutionPlan::getStepCount() {
 void ExecutionPlan::setDelay(long wait) {
 	delay = wait;
 	timePassed = wait;
+}
+
+void ExecutionPlan::reset() {
+	currentStep = 0;
 }

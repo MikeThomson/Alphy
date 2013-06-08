@@ -8,6 +8,14 @@ int currentServo = 0;
 Servo servos[12];
 int servoAngles[12];
 
+ExecutionPlan *plan;
+
+long averageLoopSpeed;
+long lastTime = 0;
+
+bool inPlanMode = false;
+bool running = false;
+
 Kinematic kinematic;
 
 //The setup function is called once at startup of the sketch
@@ -21,12 +29,25 @@ void setup() {
 #endif
 	initCommands();
 	initServos();
+	loadInitialPosition();
+	averageLoopSpeed = 0;
+	lastTime = millis();
+}
+
+long weightedAverageFilter(long reading, long currentValue, float weight) {
+	return reading + (long) (weight * (currentValue - reading));
 }
 
 // The loop function is called in an endless loop
 void loop() {
 	serialCommand.readSerial();
-
+	long currentTime = millis();
+	long elapsedTime = currentTime - lastTime;
+	lastTime = currentTime;
+	if(running) {
+		plan->run(elapsedTime);
+	}
+	//averageLoopSpeed = weightedAverageFilter(elapsedTime, averageLoopSpeed, WEIGHT_FOR_LOOPSPEED);
 }
 
 void initCommands() {
@@ -35,6 +56,12 @@ void initCommands() {
 	serialCommand.addCommand("SET", setServo);
 	serialCommand.addCommand("TIME", time);
 	serialCommand.addCommand("FREE", freeMem);
+	serialCommand.addCommand("STATS", stats);
+	serialCommand.addCommand("PLAN", planMode);
+	serialCommand.addCommand("ENDPLAN", endPlanMode);
+	serialCommand.addCommand("STEP", addPlanStep);
+	serialCommand.addCommand("RUN", run);
+	serialCommand.addCommand("SAVESTATE", saveInitialPosition);
 	serialCommand.setDefaultHandler(unrecognized);
 }
 
@@ -54,9 +81,6 @@ void initServos() {
 	servos[BACK_RIGHT_TIBIA].attach(BACK_RIGHT_TIBIA_PIN);
 	servos[BACK_LEFT_TIBIA].attach(BACK_LEFT_TIBIA_PIN);
 
-	for (int i = 0; i < 12; i++) {
-		writeServo(i, 90);
-	}
 }
 
 int constrainAngle(int angle) {
@@ -141,7 +165,7 @@ void selectServo() {
 		debug(currentServo);
 		debug(" SELECTED\r\n");
 	} else {
-		debug("BAD ARGS\r\n");
+		debug("ERR: BAD ARGS\r\n");
 	}
 }
 
@@ -181,7 +205,7 @@ void moveLeg() {
 }
 
 void unrecognized(const char *command) {
-	debug("UNKNOWN COMMAND\r\n");
+	debug("ERR: UNKNOWN COMMAND\r\n");
 }
 
 void moveLegToPoint(int legCoxa, float x, float y, float z) {
@@ -223,7 +247,7 @@ void setServo() {
 	if (arg != NULL) {
 		servo = atoi(arg);
 	} else {
-		debug("NO SERVO SPECIFIED\r\n");
+		debug("ERR: NO SERVO SPECIFIED\r\n");
 		return;
 	}
 
@@ -232,16 +256,16 @@ void setServo() {
 	if (arg != NULL) {
 		angle = atoi(arg);
 	} else {
-		debug("NO ANGLE SPECIFIED\r\n");
+		debug("ERR: NO ANGLE SPECIFIED\r\n");
 		return;
 	}
 
 	if(servo < 0 || servo > 11) {
-		debug("INVALID SERVO\r\n");
+		debug("ERR: INVALID SERVO\r\n");
 		return;
 	}
 	if(angle < SERVO_MIN || angle > SERVO_MAX) {
-		debug("INVALID ANGLE\r\n");
+		debug("ERR: INVALID ANGLE\r\n");
 		return;
 	}
 	writeServo(servo, angle);
@@ -254,7 +278,130 @@ void freeMem() {
 }
 
 void time() {
-	debug("TIME ");
+	debug("TIME: ");
 	debug((long) millis());
 	debug("\r\n");
+}
+
+void stats() {
+	version();
+	time();
+	freeMem();
+	loopSpeed();
+}
+
+void version() {
+	debug(BUILDSTRING);
+	debug("\r\n");
+}
+
+void loopSpeed() {
+	debug("LOOP SPEED: ");
+	debug(averageLoopSpeed);
+	debug("\r\n");
+}
+
+void planMode() {
+	inPlanMode = true;
+	delete plan;
+	int runSpeed = DEFAULT_RUN_SPEED;
+	int stepCount = 0;
+	char *arg;
+
+	arg = serialCommand.next();
+	if(arg != NULL) {
+		stepCount = atoi(arg);
+	} else {
+		debug("ERR: NO COUNT GIVEN\r\n");
+	}
+	arg = serialCommand.next();
+	if (arg != NULL) {
+		runSpeed = atol(arg);
+	}
+
+	plan = new ExecutionPlan(stepCount, writeServo);
+	plan->setDelay(runSpeed);
+}
+
+void endPlanMode() {
+	inPlanMode = false;
+}
+
+void addPlanStep() {
+	char *arg;
+	int step[12];
+	bool success = true;
+	for (int i = 0; i < 12; i++) {
+		arg = serialCommand.next();
+		if (arg != NULL) {
+			step[i] = atoi(arg);
+		} else {
+			debug("ERR: ");
+			debug(i);
+			debug("IS TOO FEW ANGLES\r\n");
+			success = false;
+			break;
+		}
+	}
+
+	if(success) {
+		if(!plan->addStep(step)) {
+			debug("ERR: TOO MANY STEPS\r\n");
+		}
+		else {
+			debug("STEP ADDED\r\n");
+		}
+	}
+
+}
+
+void run() {
+	running = true;
+}
+
+/*
+ * Initial position is the first 12 bytes of EEPROM. If any of the bytes
+ * are outside SERVO_MIN and SERVO_MAX, the position is invalid and 90 is
+ * written to every servo
+ */
+
+void saveInitialPosition() {
+	debug("SAVING INITIAL POSITION\r\n");
+	for(int i=0;i<12;i++) {
+		EEPROM.write(i,(byte)readServo(i));
+	}
+	debug("INITIAL POSITION SAVED\r\n");
+}
+
+void loadInitialPosition() {
+	debug("LOADING INITIAL POSITION\r\n");
+	int temp[12];
+	bool success = true;
+	for (int i = 0; i < 12; i++) {
+		temp[i] = EEPROM.read(i);
+		if(temp[i] < SERVO_MIN || temp[i] > SERVO_MAX) {
+			debug("INVALID STATE IN EEPROM\r\n");
+			success = false;
+			break;
+		}
+	}
+	if(success) {
+		for(int i =0; i<12;i++) {
+			writeServo(i, temp[i]);
+		}
+		debug("INITIAL POSITION LOADED\r\n");
+	} else {
+		for (int i = 0; i < 12; i++) {
+			writeServo(i, 90);
+		}
+	}
+
+}
+
+void dumpEeprom() {
+
+}
+
+void getEeprom() {
+
 }

@@ -8,10 +8,12 @@
 #define Alphy_H_
 #include "defs.h"
 #include "Arduino.h"
+#include <EEPROM.h>
 #include <Servo.h>
 #include <SerialCommand.h>
 #include <MemoryFree.h>
 #include "Kinematic.h"
+#include "ExecutionPlan.h"
 //add your includes for the project Alphy here
 
 
@@ -27,9 +29,6 @@ void setup();
 
 //add your function definitions for the project Alphy here
 
-//void serialEvent1();
-void simpleLower();
-void simpleRaise();
 int constrainAngle(int angle);
 void initServos();
 void writeServo(int servo, int angle);
@@ -38,8 +37,6 @@ void pong();
 void selectServo();
 void initCommands();
 void unrecognized(const char *command);
-void raiseServo();
-void lowerServo();
 void debug(int);
 void debug(String);
 void debug(long);
@@ -48,17 +45,19 @@ void freeMem();
 void moveLeg();
 void moveLegToPoint(int, float, float, float);
 
-void lowerFemurs();
-void raiseFemurs();
-void raiseTibias();
-void lowerTibias();
-void insideCoxas();
-void outerCoxas();
-
 void setServo();
 void time();
+void stats();
+void version();
+void loopSpeed();
+void run();
 
-void simpleStand();
+void planMode();
+void endPlanMode();
+void addPlanStep();
+
+void saveInitialPosition() ;
+void loadInitialPosition() ;
 
 //Do not add code below this line
 #endif /* Alphy_H_ */
