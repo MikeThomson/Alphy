@@ -55,9 +55,18 @@ void run();
 void planMode();
 void endPlanMode();
 void addPlanStep();
+void viewPlan();
+void resetPlan();
 
 void saveInitialPosition() ;
 void loadInitialPosition() ;
+
+void savePLan() ;
+void loadPlan() ;
+
+void sweepLeg();
+
+long weightedAverageFilter(long reading, long currentValue, float weight);
 
 //Do not add code below this line
 #endif /* Alphy_H_ */

@@ -75,9 +75,10 @@
 #define FEMUR_LENGTH 2.0
 #define COXA_LENGTH 2.0
 
-#define WEIGHT_FOR_LOOPSPEED = 0.3
+#define WEIGHT_FOR_LOOPSPEED = 0.3f // ucrrently unused
 
 #define DEFAULT_RUN_SPEED 1000
+
 
 
 #endif /* DEFS_H_ */

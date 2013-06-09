@@ -35,6 +35,15 @@ bool ExecutionPlan::run(long timeElapsed) {
 	return false;
 }
 
+bool ExecutionPlan::run() {
+	if (currentStep == stepCount) return true;
+	for (int i = 0; i < 12; i++)
+		callback(i, plan[currentStep][i]);
+	currentStep++;
+	if (currentStep == stepCount) return true;
+	return false;
+}
+
 bool ExecutionPlan::isDone() {
 	return currentStep == stepCount;
 }
@@ -62,4 +71,5 @@ void ExecutionPlan::setDelay(long wait) {
 
 void ExecutionPlan::reset() {
 	currentStep = 0;
+	timePassed = delay;
 }

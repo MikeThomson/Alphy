@@ -30,6 +30,8 @@ private:
 	float getL();
 	float toDegrees(float);
 	float toRadians(float degrees);
+
+
 };
 
 #endif /* KINEMATIC_H_ */

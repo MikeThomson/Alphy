@@ -45,9 +45,11 @@ void loop() {
 	long elapsedTime = currentTime - lastTime;
 	lastTime = currentTime;
 	if(running) {
-		plan->run(elapsedTime);
+		if(plan->run(elapsedTime)) {
+			running = false;
+		}
 	}
-	//averageLoopSpeed = weightedAverageFilter(elapsedTime, averageLoopSpeed, WEIGHT_FOR_LOOPSPEED);
+	averageLoopSpeed = weightedAverageFilter(elapsedTime, averageLoopSpeed, 0.3);
 }
 
 void initCommands() {
@@ -61,7 +63,10 @@ void initCommands() {
 	serialCommand.addCommand("ENDPLAN", endPlanMode);
 	serialCommand.addCommand("STEP", addPlanStep);
 	serialCommand.addCommand("RUN", run);
+	serialCommand.addCommand("RESET", resetPlan);
 	serialCommand.addCommand("SAVESTATE", saveInitialPosition);
+	serialCommand.addCommand("KIN", moveLeg);
+	serialCommand.addCommand("SWEEP", sweepLeg);
 	serialCommand.setDefaultHandler(unrecognized);
 }
 
@@ -141,9 +146,9 @@ void writeServo(int servo, int angleSet) {
 	}
 	debug("SERVO ");
 	debug(servo);
-	debug(" [");
+	debug(" ");
 	debug(finalAngle);
-	debug("]\r\n");
+	debug("\r\n");
 	servos[servo].write(finalAngle);
 
 }
@@ -404,4 +409,22 @@ void dumpEeprom() {
 
 void getEeprom() {
 
+}
+
+void resetPlan() {
+	plan->reset();
+}
+
+void sweepLeg() {
+	float x = 1;
+	float y = 3;
+	float z = 1.5;
+
+	for(;x>-1.0;x-=0.1) {
+		kinematic.calculateInverse(x,y,z);
+		writeServo(0, kinematic.getCoxaAngle());
+		writeServo(1, kinematic.getFemurAngle());
+		writeServo(2, kinematic.getTibiaAngle());
+		delay(150);
+	}
 }
