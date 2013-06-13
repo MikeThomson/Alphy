@@ -40,6 +40,10 @@ public:
 	static void dumpEeprom(void (*cb)(byte*), int length);
 	static void rawWriteEeprom(byte* , int address,int length);
 
+	/*
+	static Settings loadSettings() ;
+	static void saveSettings(Settings settings) ;
+*/
 
 private:
 	static bool used[16];

@@ -31,8 +31,10 @@ private:
 
 	Kinematic* kin;
 
-	CreepGait::LegPlanArray generateLeg();
-	CreepGait::FullPlanArray interleaveLegs(LegPlanArray l);
+	CreepGait::LegPlanArray generateFrontLeg();
+	CreepGait::LegPlanArray generateBackLeg();
+	CreepGait::LegPlanArray generateLegFromCoords( float centerX, float forwardX, float backwardX, float downZ, float upZ, float yOffset) ;
+	CreepGait::FullPlanArray interleaveLegs(LegPlanArray front, LegPlanArray back);
 	CreepGait::StepArray getStep(float x, float y, float z);
 	int wrapIndex(int index);
 

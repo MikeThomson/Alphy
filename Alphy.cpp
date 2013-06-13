@@ -159,7 +159,7 @@ void writeServo(int servo, int angleSet) {
 		finalAngle = constrainAngle(angleSet);
 		servoAngles[servo] = finalAngle;
 	}
-	debug("SERVO ");
+	debug("SERVO: ");
 	debug(servo);
 	debug(" ");
 	debug(finalAngle);
@@ -431,8 +431,8 @@ void loadCreep() {
 	long speed;
 	float rideHeight;
 	float stepHeight = 1.0;
-	float stanceWidth = 10.5;
-	float stanceLength = 6.0;
+	float stanceWidth = 9.5;
+	float stanceLength = 8.0;
 	float stepLength;
 
 	char *arg;
