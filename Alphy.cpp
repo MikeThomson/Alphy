@@ -15,6 +15,7 @@ long lastTime = 0;
 
 bool inPlanMode = false;
 bool running = false;
+bool continuous = false;
 
 Kinematic kinematic;
 
@@ -34,6 +35,14 @@ void setup() {
 	lastTime = millis();
 }
 
+void continuousOn() {
+	continuous = true;
+}
+
+void continuousOff() {
+	continuous = false;
+}
+
 long weightedAverageFilter(long reading, long currentValue, float weight) {
 	return reading + (long) (weight * (currentValue - reading));
 }
@@ -46,7 +55,10 @@ void loop() {
 	lastTime = currentTime;
 	if(running) {
 		if(plan->run(elapsedTime)) {
-			running = false;
+			if(continuous) {
+				plan->reset();
+			}
+			else running = false;
 		}
 	}
 	averageLoopSpeed = weightedAverageFilter(elapsedTime, averageLoopSpeed, 0.3);
@@ -67,6 +79,9 @@ void initCommands() {
 	serialCommand.addCommand("SAVESTATE", saveInitialPosition);
 	serialCommand.addCommand("KIN", moveLeg);
 	serialCommand.addCommand("SWEEP", sweepLeg);
+	serialCommand.addCommand("CONT", continuousOn);
+	serialCommand.addCommand("NOCONT", continuousOff);
+	serialCommand.addCommand("LOADCREEP", loadCreep);
 	serialCommand.setDefaultHandler(unrecognized);
 }
 
@@ -224,23 +239,6 @@ void moveLegToPoint(int legCoxa, float x, float y, float z) {
 	debug("Tibia: ");
 	debug(kinematic.getTibiaAngle());
 	debug("\r\n");
-}
-
-void debug(String string) {
-#ifdef DEBUG_SERIAL
-	Serial.print(string);
-#endif
-#ifdef DEBUG_SERIAL1
-	Serial1.print(string);
-#endif
-}
-
-void debug(int string) {
-	debug(String(string));
-}
-
-void debug(long string) {
-	debug(String((long) string));
 }
 
 void setServo() {
@@ -427,4 +425,40 @@ void sweepLeg() {
 		writeServo(2, kinematic.getTibiaAngle());
 		delay(150);
 	}
+}
+
+void loadCreep() {
+	long speed;
+	float rideHeight;
+	float stepHeight = 1.0;
+	float stanceWidth = 10.5;
+	float stanceLength = 6.0;
+	float stepLength;
+
+	char *arg;
+
+	arg = serialCommand.next();
+	if (arg != NULL) {
+		speed = atol(arg);
+	} else {
+		debug("ERR: NO SPEED GIVEN\r\n");
+	}
+	arg = serialCommand.next();
+	if (arg != NULL) {
+		rideHeight = ::atof(arg);
+	} else {
+		debug("ERR: NO HEIGHT GIVEN\r\n");
+	}
+	arg = serialCommand.next();
+	if (arg != NULL) {
+		stepLength = ::atof(arg);
+	} else {
+		debug("ERR: NO STEP LENGTH GIVEN\r\n");
+	}
+
+	CreepGait* gait = new CreepGait(&kinematic, rideHeight, stepLength, stanceWidth, stanceLength, stepHeight);
+	plan = gait->getPlan();
+	plan->registerServoCallback(writeServo);
+	plan->setDelay(speed);
+	plan->reset();
 }

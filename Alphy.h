@@ -8,12 +8,14 @@
 #define Alphy_H_
 #include "defs.h"
 #include "Arduino.h"
+#include "debug.h"
 #include <EEPROM.h>
 #include <Servo.h>
 #include <SerialCommand.h>
 #include <MemoryFree.h>
 #include "Kinematic.h"
 #include "ExecutionPlan.h"
+#include "CreepGait.h"
 //add your includes for the project Alphy here
 
 
@@ -37,9 +39,6 @@ void pong();
 void selectServo();
 void initCommands();
 void unrecognized(const char *command);
-void debug(int);
-void debug(String);
-void debug(long);
 void freeMem();
 
 void moveLeg();
@@ -65,6 +64,10 @@ void savePLan() ;
 void loadPlan() ;
 
 void sweepLeg();
+void loadCreep();
+
+void continuousOn();
+void continuousOff();
 
 long weightedAverageFilter(long reading, long currentValue, float weight);
 

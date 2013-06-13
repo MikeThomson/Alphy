@@ -8,6 +8,8 @@
 #ifndef EXECUTIONPLAN_H_
 #define EXECUTIONPLAN_H_
 
+#include <Arduino.h>
+
 class ExecutionPlan {
 public:
 	ExecutionPlan(int stepCount, void (*cb)(int, int));
@@ -20,6 +22,7 @@ public:
 	int getStepCount();
 	void setDelay(long wait);
 	void reset();
+
 
 private:
 	int plan[20][12];

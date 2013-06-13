@@ -54,11 +54,11 @@
 #define FRONT_RIGHT_FEMUR_INVERT false
 #define FRONT_RIGHT_TIBIA_INVERT true
 
-#define BACK_LEFT_COXA_INVERT false
+#define BACK_LEFT_COXA_INVERT true
 #define BACK_LEFT_FEMUR_INVERT false
 #define BACK_LEFT_TIBIA_INVERT true
 
-#define BACK_RIGHT_COXA_INVERT true
+#define BACK_RIGHT_COXA_INVERT false
 #define BACK_RIGHT_FEMUR_INVERT true
 #define BACK_RIGHT_TIBIA_INVERT false
 

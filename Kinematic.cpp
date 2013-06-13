@@ -71,7 +71,7 @@ float Kinematic::getAlpha() {
 }
 
 float Kinematic::getGamma() {
-	return atan(x/y); // Probably convert to atan2, if we use gamme elsewhere we need to worry about the 90
+	return atan(x/y); // Probably convert to atan2,
 }
 
 float Kinematic::getBeta() {
@@ -103,5 +103,5 @@ void Kinematic::calculateForward(int coxa, int femur, int tibia) {
 }
 
 float Kinematic::toRadians(float degrees) {
-
+	return degrees / 57.3;
 }
