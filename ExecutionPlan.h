@@ -22,6 +22,7 @@ public:
 	int getStepCount();
 	void setDelay(long wait);
 	void reset();
+	void setSmooth(bool onOff = true);
 
 
 private:
@@ -32,6 +33,8 @@ private:
 	long delay;
 	int stepsAdded;
 	void (*callback)(int, int);
+	bool smooth;
+
 
 };
 

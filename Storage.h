@@ -11,6 +11,7 @@
 #include <EEPROM.h>
 #include "ExecutionPlan.h"
 #include "defs.h"
+#include "Settings.h"
 
 #define STORAGE_EEPROM_SIZE 4096
 /*
@@ -40,10 +41,10 @@ public:
 	static void dumpEeprom(void (*cb)(byte*), int length);
 	static void rawWriteEeprom(byte* , int address,int length);
 
-	/*
-	static Settings loadSettings() ;
+
+	static Settings* loadSettings() ;
 	static void saveSettings(Settings settings) ;
-*/
+
 
 private:
 	static bool used[16];

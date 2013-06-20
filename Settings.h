@@ -8,11 +8,14 @@
 #ifndef SETTINGS_H_
 #define SETTINGS_H_
 
+#define SETTINGS_VERSION "abc"
+
 struct Settings {
+	char version[4];
 	float StanceWidth;
 	float StanceLength;
 	float StepHeight;
-	bool SmoothRun = false;
+	bool SmoothRun;
 };
 
 

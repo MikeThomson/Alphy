@@ -23,24 +23,47 @@ void ExecutionPlan::registerServoCallback(void (*cb)(int, int)) {
 }
 
 bool ExecutionPlan::run(long timeElapsed) {
-	if(currentStep == stepCount) return true;
+	if (currentStep == stepCount)
+		return true;
 	timePassed -= timeElapsed;
-	if(timePassed <= 0) {
+	if (timePassed <= 0 && !smooth) { // simple step
 		timePassed = delay - timePassed; // The lefotver. should check for going past 0 again
-		for(int i=0;i<12;i++)
+		for (int i = 0; i < 12; i++) {
 			callback(i, plan[currentStep][i]);
+		}
 		currentStep++;
-		if(currentStep == stepCount) return true;
+		if (currentStep == stepCount)
+			return true;
+	} else if (smooth) { // we should update with fractional steps
+		if (timePassed <= 0) { // we're in the next step
+			currentStep++;
+			timePassed = delay - timePassed;
+		}
+		if (currentStep == stepCount - 1) { // just do a simple update because there's nowhere to go next
+			for (int i = 0; i < 12; i++) {
+				callback(i, plan[currentStep][i]);
+			}
+			currentStep++; // Kinda a hacky way to do this, but it works for now
+		} else {
+			float fractionPassed = (delay - timePassed) / (float) delay; // probably should clamp or handle 0 < x < 1
+			for (int i = 0; i < 12; i++) {
+				int angle = plan[currentStep][i] + (int)((plan[currentStep + 1][i] - plan[currentStep][i]) * fractionPassed);
+				callback(i, angle);
+			}
+		}
+
 	}
 	return false;
 }
 
 bool ExecutionPlan::run() {
-	if (currentStep == stepCount) return true;
+	if (currentStep == stepCount)
+		return true;
 	for (int i = 0; i < 12; i++)
 		callback(i, plan[currentStep][i]);
 	currentStep++;
-	if (currentStep == stepCount) return true;
+	if (currentStep == stepCount)
+		return true;
 	return false;
 }
 
@@ -49,8 +72,9 @@ bool ExecutionPlan::isDone() {
 }
 
 bool ExecutionPlan::addStep(int step[12]) {
-	if(stepsAdded == stepCount) return false;
-	for(int i = 0;i < 12; i++)
+	if (stepsAdded == stepCount)
+		return false;
+	for (int i = 0; i < 12; i++)
 		plan[stepsAdded][i] = step[i];
 	stepsAdded++;
 	return true;
@@ -72,4 +96,8 @@ void ExecutionPlan::setDelay(long wait) {
 void ExecutionPlan::reset() {
 	currentStep = 0;
 	timePassed = delay;
+}
+
+void ExecutionPlan::setSmooth(bool onOff) {
+	smooth = onOff;
 }

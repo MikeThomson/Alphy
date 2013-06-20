@@ -3,8 +3,6 @@
 
 SerialCommand serialCommand;
 
-int currentServo = 0;
-
 Servo servos[12];
 int servoAngles[12];
 
@@ -66,7 +64,6 @@ void loop() {
 
 void initCommands() {
 	serialCommand.addCommand("PING", pong);
-	serialCommand.addCommand("SELECT", selectServo);
 	serialCommand.addCommand("SET", setServo);
 	serialCommand.addCommand("TIME", time);
 	serialCommand.addCommand("FREE", freeMem);
@@ -77,9 +74,8 @@ void initCommands() {
 	serialCommand.addCommand("RUN", run);
 	serialCommand.addCommand("RESET", resetPlan);
 	serialCommand.addCommand("SAVESTATE", saveInitialPosition);
-	serialCommand.addCommand("KIN", moveLeg);
-	serialCommand.addCommand("SWEEP", sweepLeg);
 	serialCommand.addCommand("CONT", continuousOn);
+	serialCommand.addCommand("LEG", moveLeg);
 	serialCommand.addCommand("NOCONT", continuousOff);
 	serialCommand.addCommand("LOADCREEP", loadCreep);
 	serialCommand.setDefaultHandler(unrecognized);
@@ -162,7 +158,7 @@ void writeServo(int servo, int angleSet) {
 	debug("SERVO: ");
 	debug(servo);
 	debug(" ");
-	debug(finalAngle);
+	debug(angleSet);
 	debug("\r\n");
 	servos[servo].write(finalAngle);
 
@@ -176,26 +172,16 @@ int readServo(int servo) {
 	return servoAngles[servo];
 }
 
-void selectServo() {
-	char *arg;
-	arg = serialCommand.next();
-	if (arg != NULL) {
-		currentServo = atoi(arg);
-		debug("SERVO ");
-		debug(currentServo);
-		debug(" SELECTED\r\n");
-	} else {
-		debug("ERR: BAD ARGS\r\n");
-	}
-}
-
 void moveLeg() {
 	char *arg;
-	float x,y,z;
+	float x = 0;
+	float y = 0;
+	float z = 0;
+	int servo = 0;
 
 	arg = serialCommand.next();
 	if (arg != NULL) {
-		currentServo = atoi(arg);
+		servo = atoi(arg) * 3;
 	} else {
 		debug("BAD ARGS\r\n");
 	}
@@ -221,7 +207,7 @@ void moveLeg() {
 		debug("BAD ARGS\r\n");
 	}
 
-	moveLegToPoint(currentServo, x, y, z);
+	moveLegToPoint(servo, x, y, z);
 }
 
 void unrecognized(const char *command) {
@@ -229,16 +215,10 @@ void unrecognized(const char *command) {
 }
 
 void moveLegToPoint(int legCoxa, float x, float y, float z) {
-	kinematic.calculateInverse(z, y, z);
-	debug("Coxa: ");
-	debug(kinematic.getCoxaAngle());
-	debug("\r\n");
-	debug("Femur: ");
-	debug(kinematic.getFemurAngle());
-	debug("\r\n");
-	debug("Tibia: ");
-	debug(kinematic.getTibiaAngle());
-	debug("\r\n");
+	kinematic.calculateInverse(x,y,z);
+	writeServo(legCoxa, kinematic.getCoxaAngle());
+	writeServo(legCoxa+1, kinematic.getFemurAngle());
+	writeServo(legCoxa+2, kinematic.getTibiaAngle());
 }
 
 void setServo() {
@@ -413,20 +393,6 @@ void resetPlan() {
 	plan->reset();
 }
 
-void sweepLeg() {
-	float x = 1;
-	float y = 3;
-	float z = 1.5;
-
-	for(;x>-1.0;x-=0.1) {
-		kinematic.calculateInverse(x,y,z);
-		writeServo(0, kinematic.getCoxaAngle());
-		writeServo(1, kinematic.getFemurAngle());
-		writeServo(2, kinematic.getTibiaAngle());
-		delay(150);
-	}
-}
-
 void loadCreep() {
 	long speed;
 	float rideHeight;
@@ -460,5 +426,6 @@ void loadCreep() {
 	plan = gait->getPlan();
 	plan->registerServoCallback(writeServo);
 	plan->setDelay(speed);
+	plan->setSmooth(true);
 	plan->reset();
 }
