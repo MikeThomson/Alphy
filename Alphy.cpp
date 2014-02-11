@@ -17,6 +17,8 @@ bool continuous = false;
 
 Kinematic kinematic;
 
+Settings* settings;
+
 //The setup function is called once at startup of the sketch
 void setup() {
 // Add your initialization code here
@@ -31,6 +33,7 @@ void setup() {
 	loadInitialPosition();
 	averageLoopSpeed = 0;
 	lastTime = millis();
+	initSettings();
 }
 
 void continuousOn() {
@@ -39,6 +42,57 @@ void continuousOn() {
 
 void continuousOff() {
 	continuous = false;
+}
+
+void setSetting() {
+	char *arg;
+	char *val;
+
+	arg = serialCommand.next();
+	val = serialCommand.next();
+	if(arg == NULL || val == NULL) {
+		debug("ERR: Not enough params\r\n");
+	}
+
+	if(strcmp(arg, "StanceWidth")) {
+		settings->StanceWidth = ::atof(val);
+	} else if(strcmp(arg, "StanceLength")) {
+		settings->StanceLength = ::atof(val);
+	} else if(strcmp(arg, "StepHeight")) {
+		settings->StanceLength = ::atof(val);
+	} else if(strcmp(arg, "SmoothRun")) {
+		settings->StanceLength = strcmp(val, "true") == 0 ? true : false;
+	}
+	// right now we're gonna autosave
+	Storage::saveSettings(*settings);
+}
+
+void printSettings() {
+	debug("Setting: Version ");
+	debug(settings->version1);
+	debug(".");
+	debug(settings->version2);
+	debug("\r\n");
+
+	debug("Setting: StanceLength ");
+	debug(settings->StanceLength);
+	debug("\r\n");
+
+	debug("Setting: StanceWidth ");
+	debug(settings->StanceWidth);
+	debug("\r\n");
+
+	debug("Setting: StanceLength ");
+	debug(settings->StepHeight);
+	debug("\r\n");
+
+	debug("Setting: SmoothRun ");
+	debug(settings->SmoothRun);
+	debug("\r\n");
+}
+
+void initSettings() {
+	settings = Storage::loadSettings();
 }
 
 long weightedAverageFilter(long reading, long currentValue, float weight) {
@@ -78,6 +132,8 @@ void initCommands() {
 	serialCommand.addCommand("LEG", moveLeg);
 	serialCommand.addCommand("NOCONT", continuousOff);
 	serialCommand.addCommand("LOADCREEP", loadCreep);
+	serialCommand.addCommand("SETTING", setSetting);
+	serialCommand.addCommand("SETTINGS", printSettings);
 	serialCommand.setDefaultHandler(unrecognized);
 }
 

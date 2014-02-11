@@ -16,6 +16,8 @@
 #include "Kinematic.h"
 #include "ExecutionPlan.h"
 #include "CreepGait.h"
+#include "Settings.h"
+#include "Storage.h"
 //add your includes for the project Alphy here
 
 
@@ -68,6 +70,10 @@ void loadCreep();
 
 void continuousOn();
 void continuousOff();
+
+void setSetting();
+void printSettings();
+void initSettings();
 
 long weightedAverageFilter(long reading, long currentValue, float weight);
 
